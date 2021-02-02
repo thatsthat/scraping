@@ -17,27 +17,31 @@ async function run() {
   let content = await page.content();
   let $ = cheerio.load(content);
   let parkings = [];
-  let inps = $(".CMBLOCATIONCSS > option").map(function () {
+  let inps = $(".CMBLOCATIONCSS > option").map(async function () {
     let parkVal = $(this).val();
     let parkName = $(this).text();
+    await page.select(`select[name="CMBLOCATION"]`, parkVal);
+    await page.waitForTimeout(2500);
+    // Reload web content
+    content = await page.content();
+    let $1 = cheerio.load(content);
+    // Select Floor
+    let maxFloor = [];
+    let inps2 = $1(".CMBFLOORCSS > option").map(function () {
+      maxFloor = $1(this).val();
+    });
     let parking = {
       valNum: parkVal,
       name: parkName,
+      numFloors: maxFloor,
     };
     parkings.push(parking);
   });
   console.log(parkings);
-  // Select Parking and floor
-  await page.select(`select[name="CMBLOCATION"]`, "5");
-  await page.waitForTimeout(500);
-  await page.select(`select[name="CMBFLOOR"]`, "1");
-  await page.waitForTimeout(500);
-  // Reload web content
-  content = await page.content();
-  $ = cheerio.load(content);
-  let inps2 = $("td#G0mg > table > tbody > tr").length;
-  console.log(inps2);
+  // await page.select(`select[name="CMBFLOOR"]`, "1");
+  // await page.waitForTimeout(500);
+  // let inps2 = $("td#G0mg > table > tbody > tr").length;
 
-  //browser.close();
+  browser.close();
 }
 run();
