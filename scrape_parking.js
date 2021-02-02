@@ -7,51 +7,37 @@ const parse2csv = require("json2csv");
 puppeteer.use(StealthPlugin());
 
 async function run() {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
-  // loop over result pages
   var cars = [];
-  for (j = 1; j < 5; j++) {
-    let url = `https://www.coches.net/hibrido/segunda-mano/barcelona/?pg=${j}&MaxKms=100000&KeyWords=yaris&Fueltype2`;
-    await page.goto(url);
-    let content = await page.content();
-    var $ = cheerio.load(content);
-    // loop over all cars in the page
-    $(".mt-CardAd-link").each(function (i, element) {
-      var a = $(this);
-      var model = a.children().eq(0).text().trim();
-      var precio = a
-        .find("span:contains('contado')")
-        .next()
-        .text()
-        .replace(".", "")
-        .replace(" €", "");
-      var kms = a
-        .find("li:contains('km')")
-        .text()
-        .trim()
-        .replace(" km", "")
-        .replace(".", "");
-      var year = a.find("li:contains('km')").prev().text().trim();
-      var car = {
-        km: kms,
-        price: precio,
-        any: year,
-        car: model,
-      };
-      cars.push(car);
-    });
-  }
-  browser.close();
-  // Save results to csv file
-  const resFields = Object.keys(cars[0]);
-  const opts = { fields: resFields, withBOM: true };
-  const resul_csv = parse2csv.parse(cars, opts);
-  fs.writeFile("cars.csv", resul_csv, (err) => {
-    if (err) throw err;
-    console.log("Cars saved!");
+  //for (j = 1; j < 2; j++) {
+  const url = `http://parking.procornella.cat:7770`;
+  await page.goto(url);
+  await page.waitForTimeout(1000);
+  let content = await page.content();
+  let $ = cheerio.load(content);
+  let parkings = [];
+  let inps = $(".CMBLOCATIONCSS > option").map(function () {
+    let parkVal = $(this).val();
+    let parkName = $(this).text();
+    let parking = {
+      valNum: parkVal,
+      name: parkName,
+    };
+    parkings.push(parking);
   });
+  console.log(parkings);
+  // Select Parking and floor
+  await page.select(`select[name="CMBLOCATION"]`, "5");
+  await page.waitForTimeout(500);
+  await page.select(`select[name="CMBFLOOR"]`, "1");
+  await page.waitForTimeout(500);
+  // Reload web content
+  content = await page.content();
+  $ = cheerio.load(content);
+  let inps2 = $("td#G0mg > table > tbody > tr").length;
+  console.log(inps2);
 
-  //console.log(cars);
+  //browser.close();
 }
 run();
