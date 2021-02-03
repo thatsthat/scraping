@@ -12,7 +12,7 @@ async function run() {
   // loop over result pages
   var cars = [];
   for (j = 1; j < 5; j++) {
-    let url = `https://www.coches.net/hibrido/segunda-mano/barcelona/?pg=${j}&MaxKms=100000&KeyWords=yaris&Fueltype2`;
+    let url = `https://www.coches.net/hibrido/segunda-mano/?pg=1&MaxKms=100000&KeyWords=yaris&Fueltype2`;
     await page.goto(url);
     let content = await page.content();
     var $ = cheerio.load(content);

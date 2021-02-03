@@ -7,40 +7,49 @@ const parse2csv = require("json2csv");
 puppeteer.use(StealthPlugin());
 
 async function run() {
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
-  var cars = [];
-  //for (j = 1; j < 2; j++) {
   const url = `http://parking.procornella.cat:7770`;
   await page.goto(url);
   await page.waitForTimeout(1000);
   let content = await page.content();
   let $ = cheerio.load(content);
-  let parkings = [];
+  // Select Parking 1 and iterate over floors
+  await page.select(`select[name="CMBLOCATION"]`, "1");
+  await page.waitForTimeout(500);
+  for (j = 0; j < 4; j++) {
+    await page.select(`select[name="CMBFLOOR"]`, j.toString());
+    await page.waitForTimeout(500);
+    // reload page content
+    content = await page.content();
+    $ = cheerio.load(content);
+    let resCount1 = $("td#G0mg > table > tbody > tr").length;
+  }
+  // Select Parking 2 and iterate over floors
+  await page.select(`select[name="CMBLOCATION"]`, "5");
+  await page.waitForTimeout(500);
+  for (j = 0; j < 3; j++) {
+    await page.select(`select[name="CMBFLOOR"]`, j.toString());
+    await page.waitForTimeout(500);
+    // reload page content
+    content = await page.content();
+    $ = cheerio.load(content);
+    let resCount2 = $("td#G0mg > table > tbody > tr").length;
+  }
+  /*   let parkings = [];
   let inps = $(".CMBLOCATIONCSS > option").map(async function () {
     let parkVal = $(this).val();
     let parkName = $(this).text();
-    await page.select(`select[name="CMBLOCATION"]`, parkVal);
-    await page.waitForTimeout(2500);
-    // Reload web content
-    content = await page.content();
-    let $1 = cheerio.load(content);
-    // Select Floor
-    let maxFloor = [];
-    let inps2 = $1(".CMBFLOORCSS > option").map(function () {
-      maxFloor = $1(this).val();
-    });
     let parking = {
-      valNum: parkVal,
       name: parkName,
-      numFloors: maxFloor,
+      value: parkVal,
     };
     parkings.push(parking);
   });
   console.log(parkings);
-  // await page.select(`select[name="CMBFLOOR"]`, "1");
-  // await page.waitForTimeout(500);
-  // let inps2 = $("td#G0mg > table > tbody > tr").length;
+  await page.select(`select[name="CMBFLOOR"]`, "1");
+  await page.waitForTimeout(500);
+  let inps2 = $("td#G0mg > table > tbody > tr").length; */
 
   browser.close();
 }
