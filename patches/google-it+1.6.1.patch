@@ -1,0 +1,17 @@
+diff --git a/node_modules/google-it/lib/utils.js b/node_modules/google-it/lib/utils.js
+index 7359fbf..d14cca3 100644
+--- a/node_modules/google-it/lib/utils.js
++++ b/node_modules/google-it/lib/utils.js
+@@ -56,7 +56,11 @@ var getDefaultRequestOptions = function getDefaultRequestOptions(_ref) {
+     qs: {
+       q: getFullQuery(query, includeSites, excludeSites),
+       num: limit || defaultLimit,
+-      start: start || defaultStart
++      start: start || defaultStart,
++      tbm: 'nws',
++      cr: 'countryES',
++      lr: 'lang_es',
++      gl: 'es'
+     },
+     headers: {
+       'User-Agent': userAgent || defaultUserAgent
